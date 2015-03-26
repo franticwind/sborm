@@ -141,6 +141,7 @@ public static JdbcTemplate getWriter(BaseEntity entity);
   
 ###3、生成Entity结构说明
 <pre><code>
+```java
 @Database("test")		// 绑定数据库名为test
 @Table("demo")			// 绑定表名或者表前缀为demo
 @Component			// 加入这个是为了让spring自动扫描，找不到很好的能那种多种环境的类加载模式，暂时这么搞
