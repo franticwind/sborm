@@ -1,6 +1,7 @@
 ## SBORM - 介绍&使用说明 ##
 Rick @2015-03-19
 
+
 ## 一、SBORM介绍
 
 1、目前只考虑支持mysql；
@@ -112,7 +113,7 @@ DatabaseRouter围绕数据库展开，可以配置1个或者多个节点，更�
 ###2、数据库路由选择规则
 至少要配置一个,只能配置单个写库，可以配置多个读库，具体在DatabaseRouterFactory类中实现;  
 提供以下方法：  
-<pre><code>
+```java
 /**
  * 获取默认数据库节点，如果设置了key则获取指定的节点，可以在entity设置key
  * default默认取第一个配置
@@ -136,11 +137,11 @@ public static JdbcTemplate getReader(BaseEntity entity);
  * @return
  */
 public static JdbcTemplate getWriter(BaseEntity entity);
-</code></pre>
+```
 
   
 ###3、生成Entity结构说明
-<pre><code>
+
 ```java
 @Database("test")		// 绑定数据库名为test
 @Table("demo")			// 绑定表名或者表前缀为demo
@@ -165,19 +166,20 @@ public class Demo extends BaseEntity implements Serializable {
 
 	// getter & setter ...
 }
-</code></pre>
+```
+
 **@Databse**，生成是指定数据库名称，根据Entity中该信息进行数据库路由，所有查询基于Entity和读写分离规则，不在关系jbdctemplate引用问题；  
 **@Table**，映射的表名或者表前缀（规则行分表需要）；
 Columns类，解析表所有列，方便基于Entity查询的时候指定查询条件，避免字段信息硬编码(貌似是一大特色，后面无sql查询很多是基于这个)；  
 
 ###4、排序说明
 排序有OrderBuilder实现，根据添加顺序组装；  
-<pre><code>
+```java
 QueryBuilder q = new QueryBuilder(demo);
 q.order().add(Demo.Columns.createTime, OrderMode.DESC);			// 指定排序模式
 q.order().addASC(Demo.Columns.createTime);				// 升序排序模式
 q.order().addDESC(Demo.Columns.createTime);				// 降序排序模式
-</code></pre>
+```
 
 ###5、分页处理说明
 **调用接口：**public void select(QueryBuilder queryBuilder, PageResult<?> pageResult)
@@ -200,7 +202,7 @@ q.order().addDESC(Demo.Columns.createTime);				// 降序排序模式
 
 ###8、Entity代码生成工具使用说明
 一共提供三种代码生成的模式，具体如下：  
-<pre><code>
+```java
 /**
  * 生成单个表结构对应的Bean，属性名和字段名保持一致
  * 
@@ -272,10 +274,10 @@ public static void generateAllTable(String ip, int port, String database,
  */
 public static void generateByFile(String ip, int port, String database, String userName, String password, 
 		String configFilePath, String packageName, String targetDir, String encoding);
-</code></pre>
+```
 
 ##五、例子（参考代码中的example包）
-<pre><code>
+```java
 package com.sborm.example;
 
 import java.util.Date;
@@ -390,4 +392,4 @@ public class Example {
 		System.out.println("finish");
 	}
 }
-</code></pre>
+```
