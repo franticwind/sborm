@@ -276,7 +276,22 @@ public static void generateByFile(String ip, int port, String database, String u
 		String configFilePath, String packageName, String targetDir, String encoding);
 ```
 
+
 ##五、例子（参考代码中的example包）
+```java
+package com.sborm.example.dao.impl;
+
+import org.springframework.stereotype.Repository;
+
+import com.sborm.core.dao.BaseDao;
+import com.sborm.example.dao.ITestDao;
+
+@Repository
+public class TestDao extends BaseDao implements ITestDao {
+}
+```
+**实际上这个类没有任何方法。**
+
 ```java
 package com.sborm.example;
 
