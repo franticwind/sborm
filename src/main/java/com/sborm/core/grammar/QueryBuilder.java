@@ -111,6 +111,19 @@ public class QueryBuilder extends GrammarBuilder {
 		}
 		return this.whereBuilder;
 	}
+	
+	/**
+	 * 设置查询模式，就是多个查询条件的组合模式
+	 * 只提供and或者or两种单一的组合，不支持混合模式，如果不设置，默认为and
+	 *
+	 * @param mode
+	 */
+	public QueryBuilder setQueryMode(QueryMode mode) {
+		if (this.whereBuilder != null) {
+			this.whereBuilder.setQueryMode(mode);
+		}
+		return this;
+	}
 
 	/**
 	 * 或者排序对象

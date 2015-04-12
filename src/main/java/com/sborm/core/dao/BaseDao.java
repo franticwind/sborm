@@ -8,6 +8,7 @@ import com.sborm.core.DatabaseRouterFactory;
 import com.sborm.core.EntityContainer;
 import com.sborm.core.PageResult;
 import com.sborm.core.grammar.QueryBuilder;
+import com.sborm.core.grammar.QueryMode;
 import com.sborm.core.grammar.SQL;
 import com.sborm.core.utils.EntityUtil;
 
@@ -29,14 +30,34 @@ public class BaseDao implements IBaseDao {
 		}
 		return null;
 	}
-
+	
+	@Override
+	public Object getByExample(BaseEntity entity) {
+		return getByExample(entity, QueryMode.AND);
+	}
+	
+	@Override
+	public Object getByExample(BaseEntity entity, QueryMode mode) {
+		return get(entity.getQueryBuilder().setQueryMode(mode));
+	}
+	
 	@Override
 	public List<?> select(QueryBuilder queryBuilder) {
 		List<?> list = DatabaseRouterFactory.getReader(queryBuilder.getEntity()).query(SQL.select(queryBuilder),
 				queryBuilder.getParameters().toArray(), EntityContainer.getRowMapper(queryBuilder.getEntity()));
 		return list;
 	}
-
+	
+	@Override
+	public List<?> selectByExample(BaseEntity entity) {
+		return selectByExample(entity, QueryMode.AND);
+	}
+	
+	@Override
+	public List<?> selectByExample(BaseEntity entity, QueryMode mode) {
+		return select(entity.getQueryBuilder().setQueryMode(mode));
+	}
+	
 	@Override
 	public void select(QueryBuilder queryBuilder, PageResult<?> pageResult) {
 		// 组织统计builder
@@ -49,6 +70,28 @@ public class BaseDao implements IBaseDao {
 				queryBuilder.parameters.toArray(), EntityContainer.getRowMapper(queryBuilder.getEntity()));
 		pageResult.setResultCount(count);
 		pageResult.setResults(list);
+	}
+	
+	@Override
+	public PageResult<?> select(QueryBuilder queryBuilder, int pageIndex, int pageSize) {
+		QueryBuilder countBuilder = new QueryBuilder(queryBuilder.getEntity());
+		countBuilder.setWhereBuilder(queryBuilder.getWhereBuilder());
+		long count = count(countBuilder);
+		queryBuilder.page(pageIndex, pageSize);
+		List<?> list = DatabaseRouterFactory.getReader(queryBuilder.getEntity()).query(SQL.select(queryBuilder), 
+				queryBuilder.parameters.toArray(), EntityContainer.getRowMapper(queryBuilder.getEntity()));
+		PageResult pageResult = new PageResult(list, pageIndex, pageSize, (int)count);
+		return pageResult;
+	}
+	
+	@Override
+	public PageResult<?> selectByExample(BaseEntity entity, int pageIndex, int pageSize) {
+		return selectByExample(entity, QueryMode.AND, pageIndex, pageSize);
+	}
+	
+	@Override
+	public PageResult<?> selectByExample(BaseEntity entity, QueryMode mode, int pageIndex, int pageSize) {
+		return select(entity.getQueryBuilder().setQueryMode(mode), pageIndex, pageSize);
 	}
 
 	@Override
@@ -106,17 +149,38 @@ public class BaseDao implements IBaseDao {
 	}
 	
 	@Override
-	public int updateIncrement(String column, int value, QueryBuilder queryBuilder) {
-		String sql = SQL.updateIncrement(column, value, queryBuilder);
+	public int updateByExample(BaseEntity entity) {
+		return updateByExample(entity, QueryMode.AND);
+	}
+	
+	@Override
+	public int updateByExample(BaseEntity entity, QueryMode mode) {
+		return update(entity.getQueryBuilder().setQueryMode(mode));
+	}
+	
+	@Override
+	public int updateIncrement(String column, int incr, QueryBuilder queryBuilder) {
+		String sql = SQL.updateIncrement(column, incr, queryBuilder);
 		int c = DatabaseRouterFactory.getWriter(queryBuilder.getEntity()).update(sql, queryBuilder.getParameters().toArray());
 		return c;
 	}
+	
 
 	@Override
 	public int delete(QueryBuilder queryBuilder) {
 		String sql = SQL.delete(queryBuilder);
 		int c = DatabaseRouterFactory.getWriter(queryBuilder.getEntity()).update(sql, queryBuilder.getParameters().toArray());
 		return c;
+	}
+	
+	@Override
+	public int deleteByExample(BaseEntity entity) {
+		return deleteByExample(entity, QueryMode.AND);
+	}
+	
+	@Override
+	public int deleteByExample(BaseEntity entity, QueryMode mode) {
+		return delete(entity.getQueryBuilder().setQueryMode(mode));
 	}
 
 	@Override
@@ -126,4 +190,13 @@ public class BaseDao implements IBaseDao {
 		return c;
 	}
 	
+	@Override
+	public long countByExample(BaseEntity entity) {
+		return countByExample(entity, QueryMode.AND);
+	}
+	
+	@Override
+	public long countByExample(BaseEntity entity, QueryMode mode) {
+		return count(entity.getQueryBuilder().setQueryMode(mode));
+	}
 }

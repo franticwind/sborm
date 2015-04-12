@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.core.simple.ParameterizedBeanPropertyRowMapper;
 
 import com.sborm.core.utils.AnnotationUtil;
 
@@ -42,7 +41,7 @@ public class EntityScanner implements InitializingBean {
 								EntityInfo buf = AnnotationUtil.isEntity(annotations);
 								if (buf != null) {
 									buf.setClassName(o.getName());
-									buf.setRowMapper(ParameterizedBeanPropertyRowMapper.newInstance(o));
+									buf.setRowMapper(BaseEntityRowMapper.newInstance(o));
 									result.add(buf);
 								}
 							}

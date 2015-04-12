@@ -11,6 +11,7 @@ import com.sborm.core.PageResult;
 import com.sborm.core.grammar.OrderMode;
 import com.sborm.core.grammar.QueryBuilder;
 import com.sborm.core.grammar.QueryCondition;
+import com.sborm.core.grammar.QueryMode;
 import com.sborm.example.bean.Demo;
 import com.sborm.example.dao.ITestDao;
 
@@ -70,33 +71,73 @@ public class Example {
 		try {
 			Demo demo = new Demo();
 			QueryBuilder q = new QueryBuilder(demo);
-			q.columns().select(Demo.Columns.id, Demo.Columns.name);	// 不选择默认查询所有，多参数模式
+			q.columns().select(Demo.Columns.id, Demo.Columns.name + " as name1");	// 不选择默认查询所有，多参数模式
 			q.where()
-					.add(QueryCondition.EQ(Demo.Columns.name, "test"))	// =条件
+					.add(QueryCondition.EQ(Demo.Columns.name, "newname"))	// =条件
 					.add(QueryCondition.BETWEEN(Demo.Columns.createTime, "2014-07-10 11", "2014-07-19 12")); // between条件
 			q.order().add(Demo.Columns.createTime, OrderMode.DESC);		// 条件排序
 			List<?> list = dao.select(q);
-			System.out.println(list.size());
+			System.out.println(((Demo)list.get(0)).getAliasFields("name1"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	/**
-	 * 分页查询
+	 * 基于bean querybuilder 模式查询
+	 */
+	public static void testSelect2() {
+		try {
+			Demo demo = new Demo();
+			demo.query.selectColumn(Demo.Columns.id, Demo.Columns.name);	// 不指定默认查询全部，每个查询项可以指定别名
+			demo.query.whereNameEQ("newname");
+			demo.query.whereCreateTimeBETWEEN("2014-07-10 11", "2014-07-19 12");
+			demo.query.orderByCreateTimeDESC();
+			// 方式1：根据entity查询，默认AND组织多个where条件
+			List list = dao.selectByExample(demo);
+			System.out.println(list.size() + "  --  " + ((Demo)list.get(0)).getName());
+			// 方式2：根据entity查询，自定义组织多个where条件
+			list = dao.selectByExample(demo, QueryMode.OR);
+			System.out.println(list.size() + "  --  " + ((Demo)list.get(0)).getName());
+			// 方式3：直接获取querybuilder查询，可以设置where条件组织方式，默认是and
+			list = dao.select(demo.getQueryBuilder().setQueryMode(QueryMode.AND));
+			System.out.println(list.size() + "  --  " + ((Demo)list.get(0)).getName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 分页查询，普通模式
 	 */
 	public static void testSelectPage() {
 		try {
 			Demo demo = new Demo();
 			QueryBuilder q = new QueryBuilder(demo);
 			q.columns().select(Demo.Columns.id, Demo.Columns.name);	// 不选择默认查询所有，多参数模式
-			q.where()
+			// 也可以指定where条件组织关系，or或者and
+			q.where(QueryMode.OR)
 					.add(QueryCondition.EQ(Demo.Columns.name, "test"))	// =条件
 					.add(QueryCondition.BETWEEN(Demo.Columns.createTime, "2014-07-15 11", "2014-07-19 12")); // between条件
 			q.order().add(Demo.Columns.createTime, OrderMode.DESC);		// 条件排序
 			
-			PageResult pr = new PageResult<Demo>(1, 1);
-			dao.select(q, pr);
+			PageResult pr = dao.select(q, 1, 1);
+			System.out.println(pr.getResultCount() + " - " + pr.getPageCount());
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	/**
+	 * 根据bean querybuilder 模式分页查询，参考testSelect2
+	 */
+	public static void testSelectPage2() {
+		try {
+			Demo demo = new Demo();
+			demo.query.whereNameEQ("test");
+			demo.query.whereCreateTimeBETWEEN("2014-07-15 11", "2014-07-19 12");
+			demo.query.orderByCreateTimeDESC();
+			PageResult pr = dao.selectByExample(demo, QueryMode.OR, 1, 1);
 			System.out.println(pr.getResultCount() + " - " + pr.getPageCount());
 		} catch (Exception e) {
 			
@@ -107,8 +148,9 @@ public class Example {
 		//testInsert();
 		//testUpdate();
 		//testDelete();
-		//testSelect();
-		//testSelectPage();
+		testSelect2();
+		testSelectPage();
+		testSelectPage2();
 		System.out.println("finish");
 	}
 }

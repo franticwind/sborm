@@ -1,6 +1,11 @@
 package com.sborm.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
+
+import com.sborm.core.grammar.QueryBuilder;
 
 /**
  * 实体基类，处理表相关的东西，比如分表，数据源选择  ...
@@ -19,21 +24,22 @@ public abstract class BaseEntity {
 	 */
 	private String subTableFlag = "";
 	private String databaseRouterKey;
-	
-	// 通用属性
-	private Long groupCount;	// 在分组统计的时候通用属性，sql中写死
-	
+	private Map<String, Object> aliasFields = new HashMap<String, Object>();
+	protected QueryBuilder queryBuilder = null;
+
 	public String getSubTableFlag() {
 		return subTableFlag;
 	}
 	public void setSubTableFlag(String subTableFlag) {
 		this.subTableFlag = subTableFlag;
 	}
-	public Long getGroupCount() {
-		return groupCount;
+	
+	public void setAliasField(String field, Object value) {
+		aliasFields.put(field, value);
 	}
-	public void setGroupCount(Long groupCount) {
-		this.groupCount = groupCount;
+	
+	public Object getAliasFields(String field) {
+		return aliasFields.get(field);
 	}
 	
 	/**
@@ -74,5 +80,9 @@ public abstract class BaseEntity {
 	 */
 	public String getFullTableName() {
 		return EntityContainer.getTable(this) + this.subTableFlag;
+	}
+	
+	public QueryBuilder getQueryBuilder() {
+		return this.queryBuilder;
 	}
 }

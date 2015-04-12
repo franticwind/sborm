@@ -100,6 +100,9 @@ public class EntityGenerator {
 		imports.add("com.sborm.core.annotation.Database");
 		imports.add("com.sborm.core.annotation.Table");
 		imports.add("org.springframework.stereotype.Component");
+		imports.add("com.sborm.core.grammar.QueryBuilder");
+		imports.add("com.sborm.core.grammar.QueryCondition");
+		imports.add("com.sborm.core.grammar.OrderMode");
 		
 		if (list != null && list.size() > 0) {
 			for (Map<String, String> m : list) {
@@ -144,6 +147,9 @@ public class EntityGenerator {
 		writeLine("\tpublic static final long serialVersionUID = " + l + "L;");
 		writeLine("");
 
+		writeLine("\t/**");
+		writeLine("\t * 表字段定义静态类");
+		writeLine("\t */");
 		// 列静态类
 		writeLine("\tpublic static final class Columns {");
 		for (Map<String, String> m : list) {
@@ -152,7 +158,10 @@ public class EntityGenerator {
 		}
 		writeLine("\t}");
 		writeLine("");
-
+		
+		writeLine("\t/**");
+		writeLine("\t * 字段属性");
+		writeLine("\t */");
 		// 属性信息
 		for (Map<String, String> m : list) {
 			String type = m.get("t").toUpperCase().trim();
@@ -162,7 +171,13 @@ public class EntityGenerator {
 									.get(type)) + " " + m.get("c") + ";");
 		}
 		writeLine("");
-
+		
+		// 构造函数
+		writeLine("\tpublic " + className + "() {");
+		writeLine("\t\tsuper.queryBuilder = new QueryBuilder(this);");
+		writeLine("\t}");
+		
+		writeLine("");
 		// getter setter信息
 		for (Map<String, String> m : list) {
 			String type = m.get("t").toUpperCase().trim();
@@ -179,6 +194,106 @@ public class EntityGenerator {
 			writeLine("\t\treturn this." + c + ";");
 			writeLine("\t}");
 		}
+		
+		// 组装builder内部类
+		writeLine("");
+		writeLine("\t//////////////////////////////");
+		writeLine("\t// 以下是自动组装查询条件相关的内部类");
+		writeLine("\t//////////////////////////////");
+		writeLine("\tpublic EntityQueryBuilder queryBuilder = new EntityQueryBuilder(this);");
+		writeLine("");
+		writeLine("\tpublic class EntityQueryBuilder {");
+		writeLine("\t\t" + className + " entity = null;");
+		writeLine("\t\tpublic EntityQueryBuilder(" + className + " obj) {");
+		writeLine("\t\t\tentity = obj;");
+		writeLine("\t\t}");
+		writeLine("");
+		
+		writeLine("\t\tpublic void selectColumn(String ... columns) {");
+		writeLine("\t\t\tentity.getQueryBuilder().columns().select(columns);");
+		writeLine("\t\t}");
+		
+		for (Map<String, String> m : list) {
+			String c = m.get("c");
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "EQ (Object value) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.EQ(Columns." + c + ", value));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "NEQ (Object value) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.NEQ(Columns." + c + ", value));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "GT (Object value) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.GT(Columns." + c + ", value));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "GE (Object value) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.GE(Columns." + c + ", value));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "LT (Object value) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.LT(Columns." + c + ", value));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "LE (Object value) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.LE(Columns." + c + ", value));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "LIKE (Object value) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.LIKE(Columns." + c + ", value));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "IN (Object... value) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.IN(Columns." + c + ", value));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "NOTIN (Object... value) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.NOTIN(Columns." + c + ", value));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder where" + EntityUtil.getFirstUpperString(c)
+					+ "BETWEEN (Object v1, Object v2) {");
+			writeLine("\t\t\tentity.getQueryBuilder().where().add(QueryCondition.BETWEEN(Columns." + c + ", v1, v2));");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder orderBy" + EntityUtil.getFirstUpperString(c)
+					+ "ASC () {");
+			writeLine("\t\t\tentity.getQueryBuilder().order().add(Demo.Columns." + c + ", OrderMode.ASC);");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("\t\tpublic EntityQueryBuilder orderBy" + EntityUtil.getFirstUpperString(c)
+					+ "DESC () {");
+			writeLine("\t\t\tentity.getQueryBuilder().order().add(Demo.Columns." + c + ", OrderMode.DESC);");
+			writeLine("\t\t\treturn this;");
+			writeLine("\t\t}");
+			
+			writeLine("");
+		}
+		writeLine("\t}");
+		
+		// 处理排序条件
+		
+		
 		writeLine("}");
 		writer.flush();
 		writer.close();

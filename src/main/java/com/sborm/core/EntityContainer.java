@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.jdbc.core.simple.ParameterizedBeanPropertyRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.util.Assert;
 
@@ -94,8 +93,7 @@ public class EntityContainer {
 	public static ParameterizedRowMapper<?> getRowMapper(Class<?> clazz) {
 		ParameterizedRowMapper<?> rm = rowMapping.get(clazz.getName());
 		if (rm == null) {
-			rm = ParameterizedBeanPropertyRowMapper
-					.newInstance(clazz);
+			rm = BaseEntityRowMapper.newInstance(clazz);
 			rowMapping.put(clazz.getName(), rm);
 		}
 		return rm;

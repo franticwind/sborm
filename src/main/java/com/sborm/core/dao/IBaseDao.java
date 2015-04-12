@@ -5,6 +5,7 @@ import java.util.List;
 import com.sborm.core.BaseEntity;
 import com.sborm.core.PageResult;
 import com.sborm.core.grammar.QueryBuilder;
+import com.sborm.core.grammar.QueryMode;
 
 /**
  * 基类Dao接口，只能满足单表，简单业务操作
@@ -21,7 +22,24 @@ public interface IBaseDao {
 	 * @return
 	 */
 	public Object get(QueryBuilder queryBuilder);
-
+	
+	/**
+	 * 根据Entity模板查询，默认AND模式
+	 *
+	 * @param entity
+	 * @return
+	 */
+	public Object getByExample(BaseEntity entity);
+	
+	/**
+	 * 根据Entity模板查询，自定义AND或者OR
+	 *
+	 * @param entity
+	 * @param mode
+	 * @return
+	 */
+	public Object getByExample(BaseEntity entity, QueryMode mode);
+	
 	/**
 	 * 无分页查询
 	 * @param queryBuilder
@@ -30,11 +48,60 @@ public interface IBaseDao {
 	public List<?> select(QueryBuilder queryBuilder);
 	
 	/**
+	 * 根据Entity模板查询，默认AND模式
+	 *
+	 * @param entity
+	 * @return
+	 */
+	public List<?> selectByExample(BaseEntity entity);
+	
+	/**
+	 * 根据Entity模板查询，自定义AND或者OR
+	 *
+	 * @param entity
+	 * @param mode
+	 * @return
+	 */
+	public List<?> selectByExample(BaseEntity entity, QueryMode mode);
+	
+	/**
 	 * 分页查询
 	 * @param queryBuilder
 	 * @param pageResult
 	 */
+	@Deprecated
 	public void select(QueryBuilder queryBuilder, PageResult<?> pageResult);
+	
+	/**
+	 * 分页查询
+	 *
+	 * @param queryBuilder
+	 * @param pageIndex
+	 * @param pageSize
+	 * @return
+	 */
+	public PageResult<?> select(QueryBuilder queryBuilder, int pageIndex, int pageSize);
+	
+	/**
+	 * 分页查询，根据Entity模板查询，默认AND模式
+	 *
+	 * @param entity
+	 * @param pageIndex
+	 * @param pageSize
+	 * @return
+	 */
+	public PageResult<?> selectByExample(BaseEntity entity, int pageIndex, int pageSize);
+	
+	/**
+	 * 分页查询，根据Entity模板查询，自定义查询模板
+	 *
+	 * @param entity
+	 * @param mode
+	 * @param pageIndex
+	 * @param pageSize
+	 * @return
+	 */
+	public PageResult<?> selectByExample(BaseEntity entity, QueryMode mode, int pageIndex, int pageSize);
 	
 	/**
 	 * 插入记录
@@ -87,15 +154,32 @@ public interface IBaseDao {
 	public int update(QueryBuilder queryBuilder);
 	
 	/**
-	 * 更新记录，指定字段累加
+	 * 更新记录，根据entity模板，默认AND模式
+	 *
+	 * @param entity
+	 * @return
+	 */
+	public int updateByExample(BaseEntity entity);
+	
+	/**
+	 * 更新记录，根据entity模板，自定义AND或者OR模式
+	 *
+	 * @param entity
+	 * @param mode
+	 * @return
+	 */
+	public int updateByExample(BaseEntity entity, QueryMode mode);
+	
+	/**
+	 * 更新记录，指定字段累加，提供这个接口避免需要先查询出来再累加
 	 * update xxx set a+=1 where ...
 	 * @param column
-	 * @param value
+	 * @param incr
 	 * @param queryBuilder
 	 * @return
 	 */
-	public int updateIncrement(String column, int value, QueryBuilder queryBuilder);
-
+	public int updateIncrement(String column, int incr, QueryBuilder queryBuilder);
+	
 	/**
 	 * 删除记录
 	 * @param queryBuilder
@@ -104,10 +188,44 @@ public interface IBaseDao {
 	public int delete(QueryBuilder queryBuilder);
 	
 	/**
+	 * 删除记录，根据entity模板，默认AND
+	 *
+	 * @param entity
+	 * @return
+	 */
+	public int deleteByExample(BaseEntity entity);
+	
+	/**
+	 * 删除记录，根据entity模板，自定义AND或者OR
+	 *
+	 * @param entity
+	 * @param mode
+	 * @return
+	 */
+	public int deleteByExample(BaseEntity entity, QueryMode mode);
+	
+	/**
 	 * 统计
 	 * @param queryBuilder
 	 * @return
 	 */
 	public long count(QueryBuilder queryBuilder);
+	
+	/**
+	 * 统计，根据entity模板，默认AND
+	 *
+	 * @param entity
+	 * @return
+	 */
+	public long countByExample(BaseEntity entity);
+	
+	/**
+	 * 统计，根据entity模板，自定义AND或者OR
+	 *
+	 * @param entity
+	 * @param mode
+	 * @return
+	 */
+	public long countByExample(BaseEntity entity, QueryMode mode);
 	
 }

@@ -12,7 +12,7 @@ import java.util.List;
 public class WhereBuilder extends GrammarBuilder {
 
 	private final List<QueryCondition> condtions = new ArrayList<QueryCondition>();
-	private final QueryMode mode;
+	private QueryMode mode;
 	
 	/**
 	 * 构造函数，指定组装语句类型，AND/OR
@@ -22,6 +22,9 @@ public class WhereBuilder extends GrammarBuilder {
 		this.mode = mode;
 	}
 	
+	public void setQueryMode(QueryMode mode) {
+		this.mode = mode;
+	}
 	/**
 	 * 添加查询条件
 	 * 调用方法：add(QueryCondition.EQ(column, 1) ... 

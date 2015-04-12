@@ -44,6 +44,25 @@ SBORM只是针对spring jdbc的一些不方便的地方，做了一些封装，�
 
 **4、分表操作的支持：**对于分表操作和常规的使用没有区别，只是指定分表规则，mybatis好像也可以通过制定参数实现分表处理，没搞清楚hibernate对这个是怎么处理的(hibernate好像是bean和表一对一绑定的)？
 
+**5、改造RowMapper：**基于BeanPropertyRowMapper，做了些修改，改进思路主要是针对别名、函数、联合查询模式下，单个bean无法接收一些字段的问题，通过BaseEntity设置一个map，存储这些数据，改造的BaseEntityRowMapper的mapRow方法中做了特殊处理，详细的方法请看我的博客：[《关于Spring JDBC RowMapper的一点改进思路》](http://blog.csdn.net/yefeng_918/article/details/44947459)
+
+**6、基于Entity组织查询条件：**很多朋友反馈基于QueryBuilder组织查询条件代码结构非常复杂，于是借助代码生成，在每个Entity上的添加了一个内部类EntityQueryBuildr，基于每个字段编写各种查询方法，主要是where、order两种模式，如果需要group、having等语法，还是要依赖QueryBuilder。代码结构如下(具体可以参考Demo类，以及后面的Example)：  
+```java  
+public void selectColumn(String ... columns) {
+	entity.getQueryBuilder().columns().select(columns);
+}
+public EntityQueryBuilder whereIdEQ (Object value) {
+	entity.getQueryBuilder().where().add(QueryCondition.EQ(Columns.id, value));
+	return this;
+}
+public EntityQueryBuilder whereIdNEQ (Object value) {
+	entity.getQueryBuilder().where().add(QueryCondition.NEQ(Columns.id, value));
+	return this;
+}
+
+```
+
+
 ## 四、使用说明
 
 ###1、配置说明
@@ -306,6 +325,7 @@ import com.sborm.core.PageResult;
 import com.sborm.core.grammar.OrderMode;
 import com.sborm.core.grammar.QueryBuilder;
 import com.sborm.core.grammar.QueryCondition;
+import com.sborm.core.grammar.QueryMode;
 import com.sborm.example.bean.Demo;
 import com.sborm.example.dao.ITestDao;
 
@@ -365,33 +385,73 @@ public class Example {
 		try {
 			Demo demo = new Demo();
 			QueryBuilder q = new QueryBuilder(demo);
-			q.columns().select(Demo.Columns.id, Demo.Columns.name);	// 不选择默认查询所有，多参数模式
+			q.columns().select(Demo.Columns.id, Demo.Columns.name + " as name1");	// 不选择默认查询所有，多参数模式
 			q.where()
-					.add(QueryCondition.EQ(Demo.Columns.name, "test"))	// =条件
+					.add(QueryCondition.EQ(Demo.Columns.name, "newname"))	// =条件
 					.add(QueryCondition.BETWEEN(Demo.Columns.createTime, "2014-07-10 11", "2014-07-19 12")); // between条件
 			q.order().add(Demo.Columns.createTime, OrderMode.DESC);		// 条件排序
 			List<?> list = dao.select(q);
-			System.out.println(list.size());
+			System.out.println(((Demo)list.get(0)).getAliasFields("name1"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	/**
-	 * 分页查询
+	 * 基于bean querybuilder 模式查询
+	 */
+	public static void testSelect2() {
+		try {
+			Demo demo = new Demo();
+			demo.query.selectColumn(Demo.Columns.id, Demo.Columns.name);	// 不指定默认查询全部，每个查询项可以指定别名
+			demo.query.whereNameEQ("newname");
+			demo.query.whereCreateTimeBETWEEN("2014-07-10 11", "2014-07-19 12");
+			demo.query.orderByCreateTimeDESC();
+			// 方式1：根据entity查询，默认AND组织多个where条件
+			List list = dao.selectByExample(demo);
+			System.out.println(list.size() + "  --  " + ((Demo)list.get(0)).getName());
+			// 方式2：根据entity查询，自定义组织多个where条件
+			list = dao.selectByExample(demo, QueryMode.OR);
+			System.out.println(list.size() + "  --  " + ((Demo)list.get(0)).getName());
+			// 方式3：直接获取querybuilder查询，可以设置where条件组织方式，默认是and
+			list = dao.select(demo.getQueryBuilder().setQueryMode(QueryMode.AND));
+			System.out.println(list.size() + "  --  " + ((Demo)list.get(0)).getName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 分页查询，普通模式
 	 */
 	public static void testSelectPage() {
 		try {
 			Demo demo = new Demo();
 			QueryBuilder q = new QueryBuilder(demo);
 			q.columns().select(Demo.Columns.id, Demo.Columns.name);	// 不选择默认查询所有，多参数模式
-			q.where()
+			// 也可以指定where条件组织关系，or或者and
+			q.where(QueryMode.OR)
 					.add(QueryCondition.EQ(Demo.Columns.name, "test"))	// =条件
 					.add(QueryCondition.BETWEEN(Demo.Columns.createTime, "2014-07-15 11", "2014-07-19 12")); // between条件
 			q.order().add(Demo.Columns.createTime, OrderMode.DESC);		// 条件排序
 			
-			PageResult pr = new PageResult<Demo>(1, 1);
-			dao.select(q, pr);
+			PageResult pr = dao.select(q, 1, 1);
+			System.out.println(pr.getResultCount() + " - " + pr.getPageCount());
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	/**
+	 * 根据bean querybuilder 模式分页查询，参考testSelect2
+	 */
+	public static void testSelectPage2() {
+		try {
+			Demo demo = new Demo();
+			demo.query.whereNameEQ("test");
+			demo.query.whereCreateTimeBETWEEN("2014-07-15 11", "2014-07-19 12");
+			demo.query.orderByCreateTimeDESC();
+			PageResult pr = dao.selectByExample(demo, QueryMode.OR, 1, 1);
 			System.out.println(pr.getResultCount() + " - " + pr.getPageCount());
 		} catch (Exception e) {
 			
@@ -402,8 +462,9 @@ public class Example {
 		//testInsert();
 		//testUpdate();
 		//testDelete();
-		//testSelect();
-		//testSelectPage();
+		testSelect2();
+		testSelectPage();
+		testSelectPage2();
 		System.out.println("finish");
 	}
 }

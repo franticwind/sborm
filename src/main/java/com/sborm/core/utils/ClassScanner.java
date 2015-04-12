@@ -19,31 +19,6 @@ import java.util.jar.JarFile;
 @Deprecated
 public class ClassScanner {
 
-	/**
-	 * 获取所有类名
-	 * 
-	 * @param packageName
-	 * @return
-	 */
-	// public static List<String> getClassName(String packageName) {
-	// List<String> classNames = new ArrayList<String>();
-	// try {
-	// if (!packageName.endsWith(".")) {
-	// packageName += ".";
-	// }
-	// String resourceName = packageName.replaceAll(".", "/");
-	// URL url =
-	// Thread.currentThread().getContextClassLoader().getResource(resourceName);
-	// File urlFile = new File(url.getPath());
-	// File[] files = urlFile.listFiles();
-	// for (File f : files)
-	// getClassName(packageName, f, classNames);
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	// return classNames;
-	// }
-
 	public static List<String> getClassName(String packageName) {
 		List<String> fileNames = null;
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
