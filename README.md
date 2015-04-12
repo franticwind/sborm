@@ -296,7 +296,7 @@ public static void generateByFile(String ip, int port, String database, String u
 ```
 
 
-##五、例子（参考代码中的example包）
+##五、例子（参考代码中的example包，可以使用test.sql创建测试数据库及表结构）
 ```java
 package com.sborm.example.dao.impl;
 
