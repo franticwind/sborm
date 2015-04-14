@@ -184,6 +184,28 @@ public class Demo extends BaseEntity implements Serializable {
 	private Integer type;
 
 	// getter & setter ...
+	// 省略 ...
+
+	//////////////////////////////
+	// 以下是自动组装查询条件相关的内部类
+	//////////////////////////////
+	public EntityQueryBuilder query = new EntityQueryBuilder(this);
+
+	public class EntityQueryBuilder {
+		Demo entity = null;
+		public EntityQueryBuilder(Demo obj) {
+			entity = obj;
+		}
+
+		public void selectColumn(String ... columns) {
+			entity.getQueryBuilder().columns().select(columns);
+		}
+		public EntityQueryBuilder whereIdEQ (Object value) {
+			entity.getQueryBuilder().where().add(QueryCondition.EQ(Columns.id, value));
+			return this;
+		}
+		// 省略 ...
+	}
 }
 ```
 
