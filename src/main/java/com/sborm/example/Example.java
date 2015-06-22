@@ -89,10 +89,10 @@ public class Example {
 	public static void testSelect2() {
 		try {
 			Demo demo = new Demo();
-			demo.query.selectColumn(Demo.Columns.id, Demo.Columns.name);	// 不指定默认查询全部，每个查询项可以指定别名
-			demo.query.whereNameEQ("newname");
-			demo.query.whereCreateTimeBETWEEN("2014-07-10 11", "2014-07-19 12");
-			demo.query.orderByCreateTimeDESC();
+			demo.queryBuilder.selectColumn(Demo.Columns.id, Demo.Columns.name);	// 不指定默认查询全部，每个查询项可以指定别名
+			demo.queryBuilder.whereNameEQ("newname");
+			demo.queryBuilder.whereCreateTimeBETWEEN("2014-07-10 11", "2014-07-19 12");
+			demo.queryBuilder.orderByCreateTimeDESC();
 			// 方式1：根据entity查询，默认AND组织多个where条件
 			List list = dao.selectByExample(demo);
 			System.out.println(list.size() + "  --  " + ((Demo)list.get(0)).getName());
@@ -134,9 +134,9 @@ public class Example {
 	public static void testSelectPage2() {
 		try {
 			Demo demo = new Demo();
-			demo.query.whereNameEQ("test");
-			demo.query.whereCreateTimeBETWEEN("2014-07-15 11", "2014-07-19 12");
-			demo.query.orderByCreateTimeDESC();
+			demo.queryBuilder.whereNameEQ("test");
+			demo.queryBuilder.whereCreateTimeBETWEEN("2014-07-15 11", "2014-07-19 12");
+			demo.queryBuilder.orderByCreateTimeDESC();
 			PageResult pr = dao.selectByExample(demo, QueryMode.OR, 1, 1);
 			System.out.println(pr.getResultCount() + " - " + pr.getPageCount());
 		} catch (Exception e) {
@@ -145,12 +145,12 @@ public class Example {
 	}
 
 	public static void main(String[] args) {
-		//testInsert();
+		testInsert();
 		//testUpdate();
 		//testDelete();
-		testSelect2();
-		testSelectPage();
-		testSelectPage2();
-		System.out.println("finish");
+//		testSelect2();
+//		testSelectPage();
+//		testSelectPage2();
+//		System.out.println("finish");
 	}
 }

@@ -39,6 +39,7 @@ public class EntityContainer {
 					tableMapping.put(ei.getClassName(), ei.getTable());
 					databaseMapping.put(ei.getClassName(), ei.getDatabase());
 					rowMapping.put(ei.getClassName(), ei.getRowMapper());
+					BaseEntityMapper.intiEntity(ei.getClassName());
 				}
 			} else {
 				Assert.notEmpty(list, "没有指定的Entity！");

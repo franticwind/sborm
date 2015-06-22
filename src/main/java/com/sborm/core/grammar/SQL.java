@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sborm.core.BaseEntity;
+import com.sborm.core.BaseEntityMapper;
 
 /**
  * sql语法拼装类
@@ -22,19 +23,19 @@ public class SQL {
 	 * insert 语句
 	 * 
 	 * @param entity
-	 * @param column
+	 * @param properties
 	 * @return
 	 */
-	public static String insert(BaseEntity entity, Object[] column, String option) {
+	public static String insert(BaseEntity entity, Object[] properties, String option) {
 		String opt = option == null ? "" : option;
 		StringBuilder sb = new StringBuilder("insert " + opt + " into "
 				+ entity.getDatabase() + "." + entity.getFullTableName() + " (");
 		StringBuilder fields = new StringBuilder("");
 		StringBuilder values = new StringBuilder("");
-		for (int i = 0; i < column.length; i++) {
-			fields.append(column[i]);
+		for (int i = 0; i < properties.length; i++) {
+			fields.append(BaseEntityMapper.getColumnName(entity.getClass().getName(), (String) properties[i]));
 			values.append("?");
-			if (i < column.length - 1) {
+			if (i < properties.length - 1) {
 				fields.append(",");
 				values.append(",");
 			}
@@ -50,19 +51,20 @@ public class SQL {
 	 * replace语句
 	 *
 	 * @param entity
-	 * @param column
+	 * @param properties
 	 * @return
 	 */
-	public static String replace(BaseEntity entity, Object[] column, String option) {
+	public static String replace(BaseEntity entity, Object[] properties, String option) {
 		String opt = option == null ? "" : option;
 		StringBuilder sb = new StringBuilder("replace " + opt + " into "
 				+ entity.getDatabase() + "." + entity.getFullTableName() + " (");
 		StringBuilder fields = new StringBuilder("");
 		StringBuilder values = new StringBuilder("");
-		for (int i = 0; i < column.length; i++) {
-			fields.append(column[i]);
+		for (int i = 0; i < properties.length; i++) {
+			fields.append(BaseEntityMapper.getColumnName(entity.getClass()
+					.getName(), (String) properties[i]));
 			values.append("?");
-			if (i < column.length - 1) {
+			if (i < properties.length - 1) {
 				fields.append(",");
 				values.append(",");
 			}
@@ -82,16 +84,18 @@ public class SQL {
 	 * @return
 	 */
 	public static String update(QueryBuilder queryBuilder, Map<String, Object> fields) {
-		if (queryBuilder.getEntity() != null) {
+		BaseEntity entity = queryBuilder.getEntity();
+		if (entity != null) {
 			queryBuilder.sql.append("update ");
-			queryBuilder.sql.append(queryBuilder.getEntity().getDatabase()
-					+ "." + queryBuilder.getEntity().getFullTableName());
+			queryBuilder.sql.append(entity.getDatabase()
+					+ "." + entity.getFullTableName());
 			int size = fields.size();
 			int index = 0;
 			if (size > 0) {
 				queryBuilder.sql.append(" set ");
 				for (String c : fields.keySet()) {
-					queryBuilder.sql.append(c + "=?");
+					queryBuilder.sql.append(BaseEntityMapper.getColumnName(entity.getClass()
+							.getName(), c) + "=?");
 					if (index < (size - 1)) {
 						queryBuilder.sql.append(",");
 					}
@@ -113,16 +117,18 @@ public class SQL {
 	/**
 	 * 字段累加
 	 *
-	 * @param column
+	 * @param field
 	 * @param value
 	 * @param queryBuilder
 	 * @return
 	 */
-	public static String updateIncrement(String column, int value, QueryBuilder queryBuilder) {
-		if (queryBuilder.getEntity() != null) {
+	public static String updateIncrement(String field, int value, QueryBuilder queryBuilder) {
+		BaseEntity entity = queryBuilder.getEntity();
+		if (entity != null) {
+			String column = BaseEntityMapper.getColumnName(entity.getClass().getName(), field);
 			queryBuilder.sql.append("update ");
-			queryBuilder.sql.append(queryBuilder.getEntity().getDatabase()
-					+ "." + queryBuilder.getEntity().getFullTableName());
+			queryBuilder.sql.append(entity.getDatabase()
+					+ "." + entity.getFullTableName());
 			queryBuilder.sql.append(" set " + column + "=" + column + " + " + value + " ");
 			return queryBuilder.build().toSql();
 		} else {
@@ -137,7 +143,8 @@ public class SQL {
 	 * @return
 	 */
 	public static String select(QueryBuilder queryBuilder) {
-		if (queryBuilder.getEntity() != null) {
+		BaseEntity entity = queryBuilder.getEntity();
+		if (entity != null) {
 			queryBuilder.clear();
 			queryBuilder.sql.append("select ");
 			// 组装查询字段
@@ -148,8 +155,8 @@ public class SQL {
 			}
 			// 组装表名
 			queryBuilder.sql.append(" from ");
-			queryBuilder.sql.append(queryBuilder.getEntity().getDatabase()
-					+ "." + queryBuilder.getEntity().getFullTableName());
+			queryBuilder.sql.append(entity.getDatabase()
+					+ "." + entity.getFullTableName());
 			return queryBuilder.build().toSql();
 		} else {
 			throw new GrammarException("实体类不能为空！");
@@ -163,11 +170,12 @@ public class SQL {
 	 * @return
 	 */
 	public static String count(QueryBuilder queryBuilder) {
-		if (queryBuilder.getEntity() != null) {
+		BaseEntity entity = queryBuilder.getEntity();
+		if (entity != null) {
 			queryBuilder.sql.append("select count(0) from ");
 			// 组装表名
-			queryBuilder.sql.append(queryBuilder.getEntity().getDatabase()
-					+ "." + queryBuilder.getEntity().getFullTableName());
+			queryBuilder.sql.append(entity.getDatabase()
+					+ "." + entity.getFullTableName());
 			return queryBuilder.build().toSql();
 		} else {
 			throw new GrammarException("实体类不能为空！");
@@ -181,11 +189,12 @@ public class SQL {
 	 * @return
 	 */
 	public static String delete(QueryBuilder queryBuilder) {
-		if (queryBuilder.getEntity() != null) {
+		BaseEntity entity = queryBuilder.getEntity();
+		if (entity != null) {
 			queryBuilder.sql.append("delete from ");
 			// 组装表名
-			queryBuilder.sql.append(queryBuilder.getEntity().getDatabase()
-					+ "." + queryBuilder.getEntity().getFullTableName());
+			queryBuilder.sql.append(entity.getDatabase()
+					+ "." + entity.getFullTableName());
 			return queryBuilder.build().toSql();
 		} else {
 			throw new GrammarException("实体类不能为空！");

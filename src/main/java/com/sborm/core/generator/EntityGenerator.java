@@ -99,10 +99,12 @@ public class EntityGenerator {
 		imports.add("java.io.Serializable");
 		imports.add("com.sborm.core.annotation.Database");
 		imports.add("com.sborm.core.annotation.Table");
+		imports.add("com.sborm.core.annotation.Column");
 		imports.add("org.springframework.stereotype.Component");
 		imports.add("com.sborm.core.grammar.QueryBuilder");
 		imports.add("com.sborm.core.grammar.QueryCondition");
 		imports.add("com.sborm.core.grammar.OrderMode");
+		
 		
 		if (list != null && list.size() > 0) {
 			for (Map<String, String> m : list) {
@@ -165,6 +167,7 @@ public class EntityGenerator {
 		// 属性信息
 		for (Map<String, String> m : list) {
 			String type = m.get("t").toUpperCase().trim();
+			writeLine("\t@Column(\"" + m.get("c") + "\")");
 			writeLine("\tprivate "
 					+ MysqlTypeMapping
 							.getShortClassName(MysqlTypeMapping.mapping

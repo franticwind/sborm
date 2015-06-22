@@ -97,7 +97,7 @@ public class BaseDao implements IBaseDao {
 	@Override
 	public int insert(BaseEntity entity) {
 		Map<String, Object> pojo = EntityUtil.getEntityInfo(entity);
-		Object[][] buf = EntityUtil.getColumnAndValue(pojo);
+		Object[][] buf = EntityUtil.getPropertyAndValue(pojo);
 		String sql = SQL.insert(entity, buf[0], null);
 		int c = DatabaseRouterFactory.getWriter(entity).update(sql, buf[1]);
 		return c;
@@ -106,7 +106,7 @@ public class BaseDao implements IBaseDao {
 	@Override
 	public int insertIgnore(BaseEntity entity) {
 		Map<String, Object> pojo = EntityUtil.getEntityInfo(entity);
-		Object[][] buf = EntityUtil.getColumnAndValue(pojo);
+		Object[][] buf = EntityUtil.getPropertyAndValue(pojo);
 		String sql = SQL.insert(entity, buf[0], SQL.OPT_IGNORE);
 		int c = DatabaseRouterFactory.getWriter(entity).update(sql, buf[1]);
 		return c;
@@ -115,7 +115,7 @@ public class BaseDao implements IBaseDao {
 	@Override
 	public int insertDelayed(BaseEntity entity) {
 		Map<String, Object> pojo = EntityUtil.getEntityInfo(entity);
-		Object[][] buf = EntityUtil.getColumnAndValue(pojo);
+		Object[][] buf = EntityUtil.getPropertyAndValue(pojo);
 		String sql = SQL.insert(entity, buf[0], SQL.OPT_DELAYED);
 		int c = DatabaseRouterFactory.getWriter(entity).update(sql, buf[1]);
 		return c;
@@ -124,7 +124,7 @@ public class BaseDao implements IBaseDao {
 	@Override
 	public int replace(BaseEntity entity) {
 		Map<String, Object> pojo = EntityUtil.getEntityInfo(entity);
-		Object[][] buf = EntityUtil.getColumnAndValue(pojo);
+		Object[][] buf = EntityUtil.getPropertyAndValue(pojo);
 		String sql = SQL.replace(entity, buf[0], null);
 		int c = DatabaseRouterFactory.getWriter(entity).update(sql, buf[1]);
 		return c;
@@ -133,7 +133,7 @@ public class BaseDao implements IBaseDao {
 	@Override
 	public int relpaceDelayed(BaseEntity entity) {
 		Map<String, Object> pojo = EntityUtil.getEntityInfo(entity);
-		Object[][] buf = EntityUtil.getColumnAndValue(pojo);
+		Object[][] buf = EntityUtil.getPropertyAndValue(pojo);
 		String sql = SQL.replace(entity, buf[0], SQL.OPT_DELAYED);
 		int c = DatabaseRouterFactory.getWriter(entity).update(sql, buf[1]);
 		return c;

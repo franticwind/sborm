@@ -47,6 +47,14 @@ public class BaseEntityRowMapper<T> implements ParameterizedRowMapper<T> {
 	/** Map of the fields we provide mapping for */
 	private Map<String, PropertyDescriptor> mappedFields;
 
+	public Map<String, PropertyDescriptor> getMappedFields() {
+		return mappedFields;
+	}
+
+	public void setMappedFields(Map<String, PropertyDescriptor> mappedFields) {
+		this.mappedFields = mappedFields;
+	}
+
 	/** Set of bean properties we provide mapping for */
 	private Set<String> mappedProperties;
 
@@ -143,7 +151,9 @@ public class BaseEntityRowMapper<T> implements ParameterizedRowMapper<T> {
 
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
-			PropertyDescriptor pd = this.mappedFields.get(column.replaceAll(" ", "").toLowerCase());
+			PropertyDescriptor pd = this.mappedFields.get(BaseEntityMapper
+					.getPropertyName(mappedObject.getClass().getName(),
+							column.replace(" ", "")).toLowerCase());
 			if (pd != null) {
 				try {
 					Object value = getColumnValue(rs, index, pd);

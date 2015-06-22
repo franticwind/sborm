@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sborm.core.BaseEntity;
+import com.sborm.core.annotation.Column;
 
 /**
  * pojo信息读取工具类，主要是读取entity对象信息，主动去掉BaseEntity属性
@@ -16,7 +17,7 @@ import com.sborm.core.BaseEntity;
  * 
  */
 public class EntityUtil {
-	
+
 	public static String EMPTY = "";
 
 	/**
@@ -33,19 +34,23 @@ public class EntityUtil {
 			if ("serialVersionUID".equals(name) || "subTableFlag".equals(name)) {
 				continue;
 			}
-			try {
-				Method m = entity.getClass().getMethod("get" + getFirstUpperString(name), null);
-				Object buf = m.invoke(entity, null);
-				valuesMap.put(name, buf);
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (fs[i].isAnnotationPresent(Column.class)) {
+				try {
+					Method m = entity.getClass().getMethod(
+							"get" + getFirstUpperString(name), null);
+					Object buf = m.invoke(entity, null);
+					valuesMap.put(name, buf);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return valuesMap;
 	}
-	
+
 	/**
 	 * 获取实体对象信息，排除null值
+	 * 
 	 * @param entity
 	 * @return
 	 */
@@ -57,26 +62,29 @@ public class EntityUtil {
 			if ("serialVersionUID".equals(name) || "subTableFlag".equals(name)) {
 				continue;
 			}
-			try {
-				Method m = entity.getClass().getMethod(
-						"get" + getFirstUpperString(name), null);
-				Object buf = m.invoke(entity, null);
-				if (buf != null) {// 排除null值的
-					valuesMap.put(name, buf);
+			if (fs[i].isAnnotationPresent(Column.class)) {
+				try {
+					Method m = entity.getClass().getMethod(
+							"get" + getFirstUpperString(name), null);
+					Object buf = m.invoke(entity, null);
+					if (buf != null) {// 排除null值的
+						valuesMap.put(name, buf);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		}
 		return valuesMap;
 	}
-	
+
 	/**
 	 * 获取列和值
+	 * 
 	 * @param data
 	 * @return
 	 */
-	public static Object[][] getColumnAndValue(Map<String, Object> data) {
+	public static Object[][] getPropertyAndValue(Map<String, Object> data) {
 		Object[][] result = new Object[2][];
 		Object[] columns = new Object[data.size()];
 		Object[] values = new Object[data.size()];
@@ -91,13 +99,15 @@ public class EntityUtil {
 		result[1] = values;
 		return result;
 	}
-	
+
 	/**
 	 * 获取列和值，排除null值
+	 * 
 	 * @param data
 	 * @return
 	 */
-	public static Map<String, Object>  getColumnAndValueWithoutNull(Map<String, Object> data) {
+	public static Map<String, Object> getColumnAndValueWithoutNull(
+			Map<String, Object> data) {
 		Set<String> keys = data.keySet();
 		Map<String, Object> result = new HashMap<String, Object>();
 		for (String key : keys) {
@@ -108,9 +118,10 @@ public class EntityUtil {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 首字母大写
+	 * 
 	 * @param s
 	 * @return
 	 */
